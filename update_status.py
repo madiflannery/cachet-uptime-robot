@@ -68,7 +68,17 @@ class CachetHq(object):
         self.cachet_url = cachet_url
 
     def update_component(self, id_component=1, status=None):
+        current_component_status=None
         component_status = None
+
+        url = '{0}/api/v1/{1}/{2}'.format(
+            self.cachet_url,
+            'components',
+            id_component
+        )
+        r = urllib.request.urlopen(url)
+        data = json.loads(r.read().decode(r.info().get_param('charset') or 'utf-8'))
+        current_component_status=data['data']['status']
 
         # Not Checked yet and Up
         if status in [self.UPTIME_ROBOT_NOT_CHECKED_YET, self.UPTIME_ROBOT_UP]:
@@ -82,7 +92,7 @@ class CachetHq(object):
         elif status == self.UPTIME_ROBOT_DOWN:
             component_status = self.CACHET_DOWN
 
-        if component_status:
+        if component_status and (current_component_status != self.CACHET_PERFORMANCE_ISSUES):
             url = '{0}/api/v1/{1}/{2}'.format(
                 self.cachet_url,
                 'components',
